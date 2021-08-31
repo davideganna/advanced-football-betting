@@ -26,9 +26,18 @@ work in progress
 To start the API is necessary to download all the node dependencies related to the project. To do this is important to move in the folder called API by using the following command that must be entered in the command line.
 
 - `cd /API`
-  Once this is done it'time to download the dependecies by using this command:
+
+Once this is done it'time to download the dependecies by using this command:
+
 - `npm ci`
-  So now everyhing is done the API is ready to start.
+
+So now everyhing is done the API is ready to start.
+
+Before start on Linux machines is important to check the path of the executable file of Chrome. This is a necessary step to launch correctly the web-scraper.
+To check the path please open a terminal and enter the follow command:
+- `which google-chrome-stable`
+
+After that copy the path and paste him at line 9 of the main.js file at the voice executablePath. 
 
 ### `Scripts`
 
