@@ -39,7 +39,7 @@ To start runnig the API use this command:
 
 ## `Technologies`
 
-- Phyton
+- Python
 - Node.js
 - Puppeteer
 - Cheerio
