@@ -7,7 +7,7 @@ class getLiveDataFromBwin {
     getCorrectExecutablePath = () => {
         const chromeExePath = {
             mac: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-            linux: "",
+            linux: "/usr/bin/google-chrome-stable",
             windows: "",
         }
 
@@ -40,7 +40,7 @@ class getLiveDataFromBwin {
             executablePath: this.getCorrectExecutablePath()
         });
         const page = await browser.newPage()
-        await page.goto('https://sports.bwin.it/it/sports/eventi/kjellerup-aarhus-fremad-11982068');
+        await page.goto('https://sports.bwin.it/it/sports/eventi/bsg-chemie-leipzig-fsv-luckenwalde-2:2006311');
         const htmlContent = await page.content();
 
         const $ = cheerio.load(htmlContent);
@@ -67,7 +67,7 @@ class getLiveDataFromBwin {
 
         const underOverTrashold = ($(underOverNode).find('.name'))
         underOverTrashold.each((i, el) => {
-            underOverTrasholdList.push($(el).text())
+            underOverTrasholdList.push($(el).text().replace(/,|\s+/g, "_"))
         })
 
         underOverTrasholdList.forEach((key, index) => {
