@@ -8,7 +8,7 @@ class getLiveDataFromBwin {
         const chromeExePath = {
             mac: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
             linux: "/usr/bin/google-chrome-stable",
-            windows: "",
+            windows: "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
         }
 
         const operatingSystem = process.platform
@@ -25,7 +25,7 @@ class getLiveDataFromBwin {
         }
     }
 
-    getLiveMatchOdds = async () => {
+    getLiveMatchOdds = async() => {
         let namesList = [];
         let valuesList = [];
         let underOverTrasholdValues = [];
@@ -40,7 +40,7 @@ class getLiveDataFromBwin {
             executablePath: this.getCorrectExecutablePath()
         });
         const page = await browser.newPage()
-        await page.goto('https://sports.bwin.it/it/sports/eventi/bsg-chemie-leipzig-fsv-luckenwalde-2:2006311');
+        await page.goto('https://sports.bwin.it/it/sports/eventi/kuching-fa-negeri-sembilan-2:2061582');
         const htmlContent = await page.content();
 
         const $ = cheerio.load(htmlContent);
