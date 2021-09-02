@@ -3,80 +3,109 @@ const cheerio = require("cheerio");
 const pretty = require("pretty");
 
 class getLiveDataFromBwin {
-
     getCorrectExecutablePath = () => {
         const chromeExePath = {
             mac: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
             linux: "/usr/bin/google-chrome-stable",
             windows: "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-        }
+        };
 
-        const operatingSystem = process.platform
+        const operatingSystem = process.platform;
 
         switch (operatingSystem) {
             case "win32":
-                return chromeExePath.windows
+                return chromeExePath.windows;
             case "darwin":
-                return chromeExePath.mac
+                return chromeExePath.mac;
             case "linux":
-                return chromeExePath.linux
+                return chromeExePath.linux;
             default:
-                return undefined
+                return undefined;
         }
-    }
+    };
 
     getLiveMatchOdds = async() => {
         let namesList = [];
         let valuesList = [];
-        let underOverTrasholdValues = [];
-        let underOverTrasholdList = [];
+        let underOverList = [];
         let match = {
             win_draw_loose_odds: {},
-            under_over_odds: {}
+            under_over_odds: {},
         };
 
         const browser = await puppeteer.launch({
             headless: false,
-            executablePath: this.getCorrectExecutablePath()
+            executablePath: this.getCorrectExecutablePath(),
         });
-        const page = await browser.newPage()
-        await page.goto('https://sports.bwin.it/it/sports/eventi/kuching-fa-negeri-sembilan-2:2061582');
+        const page = await browser.newPage();
+        await page.goto(
+            "https://sports.bwin.it/it/sports/eventi/fc-chelyabinsk-fc-dynamo-barnaul-2:2034709?tab=animation"
+        );
         const htmlContent = await page.content();
 
         const $ = cheerio.load(htmlContent);
-        const liveResultNode = $('.option-group-container.single');
-        const tableRows = liveResultNode.find('.option-indicator')
+        const liveResultNode = $(".option-group-container.single");
+        const tableRows = liveResultNode.find(".option-indicator");
+
         tableRows.each((i, el) => {
-            const oddsValue = ($(el).find('.value.option-value').text())
-            const names = ($(el).find('.name').text())
-            namesList.push(names)
-            valuesList.push(oddsValue)
-        })
+            const oddsValue = $(el).find(".value.option-value").text();
+            const names = $(el).find(".name").text();
+            namesList.push(names);
+            if (oddsValue.length) {
+                valuesList.push(oddsValue);
+            } else {
+                valuesList.push("This bet at the moment is offline");
+            }
+        });
 
-        match.win_draw_loose_odds[await namesList[0].replace(/\s/g, "_")] = valuesList[0]
-        match.win_draw_loose_odds[await namesList[1].replace(/\s/g, "_")] = valuesList[1]
-        match.win_draw_loose_odds[await namesList[2].replace(/\s/g, "_")] = valuesList[2]
+        if (namesList[0] && namesList[1] && namesList[2]) {
+            match.win_draw_loose_odds[namesList[0].replace(/\s/g, "_")] =
+                valuesList[0];
+            match.win_draw_loose_odds[namesList[1].replace(/\s/g, "_")] =
+                valuesList[1];
+            match.win_draw_loose_odds[namesList[2].replace(/\s/g, "_")] =
+                valuesList[2];
 
-        const underOverNode = $('.option-group-container.over-under-container.triple');
-        underOverNode.find('.option-indicator');
+            const underOverNode = $(
+                ".option-group-container.over-under-container.triple"
+            );
+            const oddsNodes = underOverNode.find(".option-indicator");
+            oddsNodes.each((i, el) => {
+                const oddsWrapper = $(el).find("div");
+                oddsWrapper.each((i, item) => {
+                    const oddsChildValue = $(item).text();
+                    if (oddsChildValue.length) {
+                        underOverList.push(oddsChildValue);
+                    } else {
+                        underOverList.push("This bet is not avaiable");
+                    }
+                });
+            });
 
-        const underOverTrasholdOdds = ($(underOverNode).find('.value'))
-        underOverTrasholdOdds.each((i, el) => {
-            underOverTrasholdValues.push($(el).text())
-        })
+            const chunkedList = this.sliceIntoChunks(underOverList, 2);
+            chunkedList.forEach((item) => {
+                const keyPattern = /,|\s+/g;
+                const key = item[0].replace(keyPattern, "_");
+                match.under_over_odds[key] = item[1];
+            });
 
-        const underOverTrashold = ($(underOverNode).find('.name'))
-        underOverTrashold.each((i, el) => {
-            underOverTrasholdList.push($(el).text().replace(/,|\s+/g, "_"))
-        })
+            await browser.close();
+            return match;
+        } else {
+            this.getLiveMatchOdds();
+        }
+    };
 
-        underOverTrasholdList.forEach((key, index) => {
-            match.under_over_odds[key] = underOverTrasholdValues[index]
-        })
-
-        await browser.close();
-        return match
+    sliceIntoChunks = (arr, chunkSize) => {
+        const res = [];
+        if (arr) {
+            for (let i = 0; i < arr.length; i += chunkSize) {
+                const chunk = arr.slice(i, i + chunkSize);
+                res.push(chunk);
+            }
+        }
+        return res;
     };
 }
 
-module.exports = getLiveDataFromBwin
+module.exports = getLiveDataFromBwin;
