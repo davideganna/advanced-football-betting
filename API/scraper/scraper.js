@@ -39,7 +39,7 @@ class getLiveDataFromBwin {
         });
         const page = await browser.newPage();
         await page.goto(
-            "https://sports.bwin.it/it/sports/eventi/fc-chelyabinsk-fc-dynamo-barnaul-2:2034709?tab=animation"
+            "https://sports.bwin.it/it/sports/eventi/jjk-jyvaskyla-kemi-city-fc-2:2035528"
         );
         const htmlContent = await page.content();
 
@@ -63,12 +63,12 @@ class getLiveDataFromBwin {
                 valuesList[0];
             match.win_draw_loose_odds[namesList[1].replace(/\s/g, "_")] =
                 valuesList[1];
-            match.win_draw_loose_odds[namesList[2].replace(/\s/g, "_")] =
+            match.win_draw_loose_odds[namesList[2].replace(/\s/g, "_")] = 
                 valuesList[2];
 
             const underOverNode = $(
                 ".option-group-container.over-under-container.triple"
-            );
+            ).first();
             const oddsNodes = underOverNode.find(".option-indicator");
             oddsNodes.each((i, el) => {
                 const oddsWrapper = $(el).find("div");
