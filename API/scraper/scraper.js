@@ -118,7 +118,13 @@ class getLiveDataFromBwin {
     };
 
     getLiveEventsUrls = async () => {
-        const urls = []
+        const res = {
+            urls: [],
+            matchInfo: {
+
+            }
+        }
+        let opponentsNames = []
         const browser = await puppeteer.launch({
             headless: false,
             executablePath: this.getCorrectExecutablePath(),
@@ -135,10 +141,25 @@ class getLiveDataFromBwin {
         eventAncorElement.each((index, el) => {
             const partialUrl = "https://sports.bwin.it"
             const eventUrl = $(el).attr("href");
-            urls.push(partialUrl + eventUrl);
+            const eventParticipants = $(el).find(".participant")
+            eventParticipants.each((index, el) => {
+                const teamName = ($(el).text())
+                opponentsNames.push(teamName)
+            })
+            const chunkedOpponentsName = this.sliceIntoChunks(opponentsNames, 2)
+            chunkedOpponentsName.forEach((item, index) => {
+                const matchObject = {
+                    [`match_${index}`]: {
+                        homeTeam: item[0],
+                        awayTeam: item[1]
+                }
+            }
+                Object.assign(res.matchInfo, matchObject)
+            })
+            res.urls.push(partialUrl + eventUrl);
         })
         await browser.close();
-        return urls;
+        return res;
     }
 
     sliceIntoChunks = (arr, chunkSize) => {
