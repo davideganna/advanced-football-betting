@@ -24,7 +24,27 @@ class getLiveDataFromBwin {
         }
     };
 
-    getLiveMatchOdds = async() => {
+    getMatchOdds = (homeTeam = "", awayTeam = "") => {
+        this.getLiveEventsUrls()
+        .then((liveMatches) => {
+            if (homeTeam.length && awayTeam.length) {
+                const matchUrl = liveMatches.filter((url) => url.includes(homeTeam.toLowerCase(), awayTeam.toLowerCase()))
+            return matchUrl[0]
+            } else {
+                console.log("Please provide a valid home and away teamnames")
+            }
+        })
+        .then((url) => {
+            if (url) {
+                return this.getOdds(url)
+            } else {
+                console.log("Sorry match not found")
+            }
+        })
+        .then(res => res ? console.log(res) : console.log("Something goes wrong"))
+    }
+
+    getOdds = async(url) => {
         let namesList = [];
         let valuesList = [];
         let underOverList = [];
@@ -39,7 +59,8 @@ class getLiveDataFromBwin {
         });
         const page = await browser.newPage();
         await page.goto(
-            "https://sports.bwin.it/it/sports/eventi/jjk-jyvaskyla-kemi-city-fc-2:2035528"
+            url,
+            {waitUntil: 'load', timeout: 0}
         );
         const htmlContent = await page.content();
 
@@ -85,7 +106,7 @@ class getLiveDataFromBwin {
             const chunkedList = this.sliceIntoChunks(underOverList, 2);
             chunkedList.forEach((item) => {
                 const keyPattern = /,|\s+/g;
-                const key = item[0].replace(keyPattern, "_");
+                const key = item[0].replace(keyPattern, "_").replace("ù", "u")
                 match.under_over_odds[key] = item[1];
             });
 
@@ -95,6 +116,30 @@ class getLiveDataFromBwin {
             this.getLiveMatchOdds();
         }
     };
+
+    getLiveEventsUrls = async () => {
+        const urls = []
+        const browser = await puppeteer.launch({
+            headless: false,
+            executablePath: this.getCorrectExecutablePath(),
+        });
+        const page = await browser.newPage();
+        await page.goto(
+            "https://sports.bwin.it/it/sports/live/scommesse",
+            {waitUntil: 'load', timeout: 0}
+        );
+        const htmlContent = await page.content();
+        const $ = cheerio.load(htmlContent);
+        const eventsLiveWrapper = $('ms-event-group').first()
+        const eventAncorElement = eventsLiveWrapper.find('.grid-info-wrapper')
+        eventAncorElement.each((index, el) => {
+            const partialUrl = "https://sports.bwin.it"
+            const eventUrl = $(el).attr("href");
+            urls.push(partialUrl + eventUrl);
+        })
+        await browser.close();
+        return urls;
+    }
 
     sliceIntoChunks = (arr, chunkSize) => {
         const res = [];
