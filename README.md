@@ -12,10 +12,10 @@ Predictions will be made based on the output of a Classification Random Forest m
 
 ## `API`
 
-This is the real time API used to fetch data from bwin. The API work in this way:
+This is the real time API used to fetch data from Bwin. The API consists of:
 
-- First of all a web scraper written in node.js extract the data of the live match that the user want to follow
-- The API establish a persistant connection with the client and every 30 seconds sends back a response in JSON format with the live odds of the match
+- A web scraper written in node.js which extracts the data of the live match that the user wants to follow.
+- A persistant connection with the client which every 30 seconds sends a response in JSON format with the live odds of the desired match.
 
 ### `Endpoints`
 
@@ -23,28 +23,28 @@ work in progress
 
 ### `Setup`
 
-To start the API is necessary to download all the node dependencies related to the project. To do this is important to move in the folder called API by using the following command that must be entered in the command line.
+Downloading the project's node dependencies is required to build the API. In order to do so, navigate in the folder called `API` by using the following command:
 
 - `cd /API`
 
-Once this is done it'time to download the dependecies by using this command:
+Download the dependecies:
 
 - `npm ci`
 
-So now everyhing is done the API is ready to start.
+The API is now ready to start.
 
-Before start on Linux machines is important to check the path of the executable file of Chrome. This is a necessary step to launch correctly the web-scraper.
-To check the path please open a terminal and enter the follow command:
+On Linux machines, it is important to check the path of the executable file of Chrome. This is a necessary step to correctly launch the web-scraper.
+To check the path, open a terminal and enter the following command:
 - `which google-chrome-stable`
 
-After that copy the path and paste him at line 9 of the main.js file at the voice executablePath. 
+Then, copy the path and paste it at line 9 of the main.js file at the voice `executablePath`. 
 
 ### `Scripts`
 
-To start runnig the API use this command:
+To start running the API use this command:
 
 - `npm run start`
-  This command will run the API that will remain waiting for calls.
+  This command will run the API that will wait for calls.
 
 ## `Technologies`
 
